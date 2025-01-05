@@ -1,6 +1,9 @@
 import dotenv from "dotenv";
 import { connectDB } from "./db/index.js";
+import {app} from './app.js'
+import {uploadOnClodinary} from "./utils/cloudinary.js";
 
+uploadOnClodinary()
 dotenv.config({
   path: "./env",
 });
