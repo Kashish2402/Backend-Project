@@ -5,11 +5,12 @@ import { uploadOnClodinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 
 const registerUser = asyncHandler(async (req, res) => {
+
   // GET USER DETAILS FROM FRONTEND AS PER OUR USER MODEL
 
   const { fullName, email, username, password } = req.body;
 
-  console.log("email", email);
+  console.log("email", username);
 
   // VALIDATION WEATHER FIELDS ARE EMPTY OR IN RIGHT FORMAT
 
@@ -21,24 +22,32 @@ const registerUser = asyncHandler(async (req, res) => {
 
   //  CHECK IF USER ALREADY EXIST
 
-  const existingUser = User.findOne({ $or: [{ username }, { email }] });
+  const existingUser = await User.findOne({ $or: [{ username }, { email }] });
 
-  if (existingUser) return ApiError(409, "User Already Exist");
+  if (existingUser) return new ApiError(409, "User Already Exist");
 
   // CHECK FOR IMAGES OR AVATAR
 
+  
   const avatarLocalPath = req.files?.avatar[0]?.path;
-  const coverImageLocalPath = req.files?.coverImage[0]?.path;
+  // const coverImageLocalPath = req.files?.coverImage[0]?.path;
+
+  let coverImageLocalPath;
+
+  if(req.files && Array.isArray(req.files.coverImage) &&req.files.coverImage.length>0){
+    coverImageLocalPath=req.files.coverImage[0].path
+  }
 
   if (!avatarLocalPath) {
     throw new ApiError(400, "AVATAR REQUIRED");
   }
 
   // UPLOAD THEM TO CLOUDINARY IF AVAILABLE, AVATAR UPLOADED SUCCECCFULLY OR NOT
+
   const avatar = await uploadOnClodinary(avatarLocalPath);
   const coverImage = await uploadOnClodinary(coverImageLocalPath);
 
-  if (!avatar) throw new ApiError(400, "AVATAR REQUIRED");
+  if (!avatar) {throw new ApiError(400, "AVATAR REQUIRED")};
 
   // CREATE USER OBJECT - CREATE ENTRY IN DB
 
@@ -46,13 +55,12 @@ const registerUser = asyncHandler(async (req, res) => {
     fullName,
     avatar: avatar.url,
     coverImage: coverImage?.url || "",
-    username: username.toLowerCase(),
+    username: username.toLowerCase,
     email,
     password,
   });
 
   // REMOVE PASSWORD AND REFRESH TOKEN FIELD FROM RESPONSE
-
   // CHECK FOR USER CREATION
   const userId = await User.findById(user._id).select(
     "-password -refreshToken",
@@ -65,7 +73,7 @@ const registerUser = asyncHandler(async (req, res) => {
   return res
     .status(201)
     .json(new ApiResponse(200, userId, "USER REGISTERED SUCCESSFULLY"));
-  // ERROR
+  
 });
 
 export { registerUser };

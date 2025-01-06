@@ -11,21 +11,25 @@ cloudinary.config({
 const uploadOnClodinary = async (localFilePath) => {
   try {
     if (!localFilePath) {
-      return new Error("Couldn't find file");
+      throw  new Error("Couldn't find file");
     }
-
+ 
     //   UPLOADING FILE ON CLOUDINARY
 
-   const response= await cloudinary.uploader.upload(localFilePath, { resource_type: auto 
+    const response = await cloudinary.uploader.upload(localFilePath, {
+      resource_type: "auto",
     });
 
-    console.log('FILE SUCCESSFULLY UPLOADED ON CLOUDINARY')
-    console.log(response.url)
+    console.log("FILE SUCCESSFULLY UPLOADED ON CLOUDINARY");
+    console.log(response);
 
+    fs.unlinkSync(localFilePath)
     return response;
   } catch (error) {
-    fs.unlinkSync(localFilePath)  //REMOVE LOCALLY SAVED TEMPORARILY FILE AS UPLOAD GOT FAILED
+    fs.existsSync(localFilePath) && fs.unlinkSync(localFilePath); //REMOVE LOCALLY SAVED TEMPORARILY FILE AS UPLOAD GOT FAILED
+    
+   return null;
   }
 };
 
-export  {uploadOnClodinary}
+export { uploadOnClodinary };
