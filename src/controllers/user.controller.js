@@ -3,6 +3,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
 import { uploadOnClodinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import  jwt  from "jsonwebtoken";
 
 const generateAccessAndRefreshTokens = async (userId) => {
   try {
@@ -43,7 +44,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
   const existingUser = await User.findOne({ $or: [{ username }, { email }] });
 
-  if (existingUser) return new ApiError(409, "User Already Exist");
+  if (existingUser) throw new ApiError(409, "User Already Exist");
 
   // CHECK FOR IMAGES OR AVATAR
 
@@ -79,7 +80,7 @@ const registerUser = asyncHandler(async (req, res) => {
     fullName,
     avatar: avatar.url,
     coverImage: coverImage?.url || "",
-    username: username.toLowerCase,
+    username: username.toLowerCase(),
     email,
     password,
   });
@@ -104,7 +105,8 @@ const loginUser = asyncHandler(async (req, res) => {
   const { email, username, password } = req.body;
 
   // VALIDATE FIELDS
-  if (!username || !email) {
+  if (!(username || email)) {
+
     throw new ApiError(400, "CREDENTIALS REQUIRED");
   }
   // CHECKING IF USER EXISTS OR NOT
@@ -134,6 +136,7 @@ const loginUser = asyncHandler(async (req, res) => {
     secure: true,
   };
 
+  
   return res
     .status(200)
     .cookie("accessToken", accessToken, options)
@@ -167,8 +170,24 @@ const logOutUser = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .clearCookie("accessToken",accessToken)
-    .clearCookie("refreshToken", refreshToken)
+    .clearCookie("accessToken")
+    .clearCookie("refreshToken")
     .json(new ApiResponse(200, {}, "User logged Out"));
 });
+
+const refreshAccessToken=asyncHandler(async(req,res,next)=>{
+  let incomingRefreshToken=req.cookie.refreshToken || req.body.refreshToken
+
+  if(!incomingRefreshToken){
+    throw new ApiError(401,"UNAUTHORISED REQUEST")
+  }
+
+ const decodedToken= jwt.verify(
+    incomingRefreshToken,
+    process.env.REFRESH_TOKEN_SECRET
+  )
+
+  const user=User.findById(decodedToken?._id)
+
+})
 export { registerUser, loginUser, logOutUser };
