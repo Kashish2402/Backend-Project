@@ -277,7 +277,19 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
 
   if (!avatarLocalPath) throw new ApiError(200, "Avatar File Missing");
 
+  
   const avatar = await uploadOnClodinary(avatarLocalPath);
+ 
+  //DELETE EXISTING FILE
+  const userdetail=await User.findById(req.user?._id);
+
+  if(userdetail?.avatar){
+    try {
+      await deleteFile(user.avatar); // Assuming deleteFile can handle URLs or convert them
+    } catch (error) {
+      console.error(`Failed to delete old avatar: ${error.message}`);
+    }
+  }
 
   if (!avatar)
     throw new ApiError(200, user, "Error while uploading Avatar File");
@@ -306,6 +318,16 @@ const updateCoverImage = asyncHandler(async (req, res) => {
 
   if (!coverImageLocalPath) throw new ApiError(200, "Cover Image File missing");
 
+  //DELETE EXISTING FILE
+  const userdetail=await User.findById(req.user?._id);
+
+  if(userdetail?.coverImage){
+    try {
+      await deleteFile(user.coverImage); // Assuming deleteFile can handle URLs or convert them
+    } catch (error) {
+      console.error(`Failed to delete old avatar: ${error.message}`);
+    }
+  }
   const coverImage = await uploadOnClodinary(coverImageLocalPath);
 
   if (!coverImage)
