@@ -277,13 +277,12 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
 
   if (!avatarLocalPath) throw new ApiError(200, "Avatar File Missing");
 
-  
   const avatar = await uploadOnClodinary(avatarLocalPath);
- 
-  //DELETE EXISTING FILE
-  const userdetail=await User.findById(req.user?._id);
 
-  if(userdetail?.avatar){
+  //DELETE EXISTING FILE
+  const userdetail = await User.findById(req.user?._id);
+
+  if (userdetail?.avatar) {
     try {
       await deleteFile(user.avatar); // Assuming deleteFile can handle URLs or convert them
     } catch (error) {
@@ -305,12 +304,8 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
   ).select("-password");
 
   res
-  .send(200)
-  .json(200, new ApiResponse(
-    200, 
-    user, 
-    "User Avatar Updated Successfully"
-  ));
+    .send(200)
+    .json(200, new ApiResponse(200, user, "User Avatar Updated Successfully"));
 });
 
 const updateCoverImage = asyncHandler(async (req, res) => {
@@ -319,9 +314,9 @@ const updateCoverImage = asyncHandler(async (req, res) => {
   if (!coverImageLocalPath) throw new ApiError(200, "Cover Image File missing");
 
   //DELETE EXISTING FILE
-  const userdetail=await User.findById(req.user?._id);
+  const userdetail = await User.findById(req.user?._id);
 
-  if(userdetail?.coverImage){
+  if (userdetail?.coverImage) {
     try {
       await deleteFile(user.coverImage); // Assuming deleteFile can handle URLs or convert them
     } catch (error) {
@@ -346,14 +341,75 @@ const updateCoverImage = asyncHandler(async (req, res) => {
   ).select("-password");
 
   res
-  .send(200)
-  .json(
-    200, 
-    new ApiResponse(
-      200, 
-      user, 
-      "Cover Image Updated Successfully"
-    ));
+    .send(200)
+    .json(200, new ApiResponse(200, user, "Cover Image Updated Successfully"));
+});
+
+const getUserChannelProfile = asyncHandler(async (req, res) => {
+  const { username } = req.params;
+
+  if (!username?.trim()) throw new ApiError(400, "Username Missing");
+
+  const channel = await User.aggregate([
+    {
+      $match: {
+        username: username?.toLowerCase(),
+      },
+    },
+    {
+      $lookup: {
+        field: "Subscription",
+        localField: _id,
+        foreignField: "channel",
+        as: "subscribers",
+      },
+    },
+    {
+      $lookup: {
+        field: "Subscription",
+        localField: _id,
+        foreignField: "subscriber",
+        as: "subscribedTo",
+      },
+    },
+    {
+      $addFields: {
+        subscribersCount: {
+          $size: "$subscribers",
+        },
+        channelsSubscribedToCount: {
+          $size: "$subscribeTo",
+        },
+        isSubscribed: {
+          $condition: {
+            if: {
+              $in: [req.user?._id, "$subscribers.subscriber"], //CHECKS WEATHER SUBSCRIBER PRESNT IN THE LIST OR NOT
+              then: true,
+              else: false,
+            },
+          },
+        },
+      },
+    },
+
+    {
+      $project: {
+        fullName: 1,
+        username: 1,
+        subscribersCount: 1,
+        channelsSubscribedToCount: 1,
+        isSubscribed: 1,
+        avatar: 1,
+        coverImage: 1,
+      },
+    },
+  ]);
+
+  if (!channel?.length) throw new ApiError(404, "Channel doesn't Exist");
+
+  return res
+    .status(200)
+    .json(200, new ApiResponse(200, channel[0], "User Fetched Successfully!!"));
 });
 
 export {
@@ -366,4 +422,5 @@ export {
   updateAccountDetails,
   updateUserAvatar,
   updateCoverImage,
+  getUserChannelProfile,
 };
