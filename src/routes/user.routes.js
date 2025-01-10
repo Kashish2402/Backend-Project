@@ -62,7 +62,7 @@ router
   .route("/avatar-update")
   .patch(
     verifyJWT, 
-    upload.single("/avatar"), 
+    upload.single("avatar"), 
     updateUserAvatar
   );
 
@@ -71,7 +71,7 @@ router
   .route("/cover-image-update")
   .patch(
     verifyJWT, 
-    upload.single("/coverImage"), 
+    upload.single("coverImage"), 
     updateCoverImage);
 
 router

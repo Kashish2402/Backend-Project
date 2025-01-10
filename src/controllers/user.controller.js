@@ -154,8 +154,8 @@ const logOutUser = asyncHandler(async (req, res) => {
   await User.findByIdAndUpdate(
     req.user._id,
     {
-      $set: {
-        refreshToken: undefined,
+      $unset: {
+        refreshToken: 1,
       },
     },
     {
@@ -175,8 +175,8 @@ const logOutUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, {}, "User logged Out"));
 });
 
-const refreshAccessToken = asyncHandler(async (req, res, next) => {
-  let incomingRefreshToken = req.cookie.refreshToken || req.body.refreshToken;
+const refreshAccessToken = asyncHandler(async (req, res) => {
+  let incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken;
 
   if (!incomingRefreshToken) {
     throw new ApiError(401, "UNAUTHORISED REQUEST");
@@ -188,7 +188,7 @@ const refreshAccessToken = asyncHandler(async (req, res, next) => {
       process.env.REFRESH_TOKEN_SECRET,
     );
 
-    const user = User.findById(decodedToken?._id);
+    const user = await User.findById(decodedToken?._id);
     if (!user) {
       throw new ApiError(401, "INVALID REFRESH TOKEN ");
     }
@@ -222,10 +222,12 @@ const refreshAccessToken = asyncHandler(async (req, res, next) => {
 });
 
 const changeCurrentUserPassword = asyncHandler(async (req, res) => {
+  
   const { oldPassword, newPassword, confirmPassword } = req.body;
 
   if (!(confirmPassword === newPassword))
     throw new ApiError(401, "New Password and Confirm Password should be same");
+  
 
   const user = await User.findById(req.user?._id);
 
@@ -369,7 +371,7 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
     {
       $lookup: {
         field: "Subscription",
-        localField: _id,
+        localField: "_id",
         foreignField: "subscriber",
         as: "subscribedTo",
       },

@@ -14,7 +14,6 @@ export const verifyJWT = asyncHandler(async (req, res, next) => {
       throw new ApiError(401, "UNAUTHORISED REQUEST - NO TOKEN PROVIDED");
     }
 
-    console.log("Token Extracted: ",token)
 
     const decodedTokenInformation = jwt.verify(
       token,
@@ -30,7 +29,7 @@ export const verifyJWT = asyncHandler(async (req, res, next) => {
     req.user = user;
     next();
   } catch (error) {
-    console.error("JWT VERIFICATION ERROR:",error)
+    // console.error("JWT VERIFICATION ERROR:",error)
     throw new ApiError(401, error?.message || "INVALID ACCESS TOKEN");
   }
 });
