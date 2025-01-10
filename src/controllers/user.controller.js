@@ -4,6 +4,8 @@ import { User } from "../models/user.model.js";
 import { uploadOnClodinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
+import { pipeline } from "stream";
+import mongoose from "mongoose";
 
 const generateAccessAndRefreshTokens = async (userId) => {
   try {
@@ -359,7 +361,7 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
     {
       $lookup: {
         field: "Subscription",
-        localField: _id,
+        localField: "_id",
         foreignField: "channel",
         as: "subscribers",
       },
@@ -412,6 +414,65 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
     .json(200, new ApiResponse(200, channel[0], "User Fetched Successfully!!"));
 });
 
+const getWatchHistory = asyncHandler(async (req, res) => {
+  const user = await User.aggregate([
+    {
+      $match: {
+        _id: new mongoose.Types.ObjectId(req.user._id),
+      },
+    },
+    {
+      $lookup: {
+        from: "videos",
+        localField: "watchHistory",
+        foreignField: "_id",
+        as: "watchHistory",
+
+        pipeline: [
+          {
+            $lookup: {
+              from: "user",
+              localField: "owner",
+              foreignField: "_id",
+              as: "owner",
+
+              pipeline: [
+                {
+                  $project: {
+                    fullName: 1,
+                    avatar: 1,
+                    username: 1,
+                  },
+                },
+              ],
+            },
+          },
+          {
+            $addFields: {
+              owner: {
+                $first: "$owner",
+              },
+            },
+          },
+        ],
+      },
+    },
+  ]);
+
+  if (!user) throw new ApiError(400, "Watch History doesn't Exist");
+
+  res
+    .send(200)
+    .json(
+      200,
+      new ApiResponse(
+        200,
+        user[0].watchHistory,
+        "Watch History Successfully Fetched!!",
+      ),
+    );
+});
+
 export {
   registerUser,
   loginUser,
@@ -423,4 +484,5 @@ export {
   updateUserAvatar,
   updateCoverImage,
   getUserChannelProfile,
+  getWatchHistory,
 };
