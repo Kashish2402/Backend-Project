@@ -55,7 +55,6 @@ const getVideoById = asyncHandler(async (req, res) => {
   if (!video)
     throw new ApiError(400, "Unable to fetch video you are requesting..");
 
-
   res
     .status(200)
     .json(new ApiResponse(200, video, "Video Fetched Successfully!!"));
@@ -65,6 +64,44 @@ const updateVideo = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
   //TODO: update video details like title, description, thumbnail
 
+  const { title, description } = req.body;
+
+  console.log(req.body)
+
+  if (!(title || description))
+    throw new ApiError(400, "Title or description Required");
+
+  const thumbnailLocalPath = req.file?.path;
+
+  console.log(req.file)
+
+  if (!thumbnailLocalPath) throw new ApiError(400, "thumbnail Required");
+
+  const thumbnail = await uploadOnClodinary(thumbnailLocalPath);
+
+  if (!thumbnail)
+    throw new ApiError(
+      400,
+      "Something went wrong... Unable to upload video on Server",
+    );
+
+  const video = await Video.findByIdAndUpdate(
+    videoId,
+    {
+      $set: {
+        title,
+        description,
+        thumbnail: thumbnail.url,
+      },
+    },
+    {
+      new: true,
+    },
+  );
+
+  if (!video) throw new ApiError(400, "Video not fetched from database");
+
+  res.status(200).json(new ApiResponse(200,video,"Video Updated Successfully!! "))
 });
 
 const deleteVideo = asyncHandler(async (req, res) => {

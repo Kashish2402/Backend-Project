@@ -23,7 +23,7 @@ const uploadOnClodinary = async (localFilePath) => {
     console.log("FILE SUCCESSFULLY UPLOADED ON CLOUDINARY");
     console.log(response);
 
-    fs.unlinkSync(localFilePath)
+    fs.unlink(localFilePath)
     return response;
   } catch (error) {
     fs.existsSync(localFilePath) && fs.unlinkSync(localFilePath); //REMOVE LOCALLY SAVED TEMPORARILY FILE AS UPLOAD GOT FAILED
