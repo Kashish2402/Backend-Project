@@ -123,6 +123,22 @@ return res.status(200).json(new ApiError(200,"Video Deleted SuccessFully"))
 
 const togglePublishStatus = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
+
+  let video=await Video.findByIdAndUpdate(
+    videoId,
+    {
+      $set:{
+        isPublished:(!isPublished)
+      }
+    },
+    {
+      new:true
+    }
+  )
+
+  if(!video) throw new ApiError(400,"Unable to toggle status")
+
+    res.status(200).json(new ApiResponse(200,video,"Toggled successfully"))
 });
 
 export {
