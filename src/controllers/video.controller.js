@@ -5,6 +5,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { uploadOnClodinary } from "../utils/cloudinary.js";
+import { json } from "express";
 
 const getAllVideos = asyncHandler(async (req, res) => {
   const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query;
@@ -27,8 +28,6 @@ const publishAVideo = asyncHandler(async (req, res) => {
   const videoFile = await uploadOnClodinary(videoFileLocalPath);
   const thumbnail = await uploadOnClodinary(thumbnailLocalPath);
 
-  
-
   if (!(videoFile && thumbnail))
     throw new ApiError(400, "Error in uploading files to the server");
 
@@ -43,24 +42,29 @@ const publishAVideo = asyncHandler(async (req, res) => {
   console.log(video[0]);
 
   return res
-    .send(200)
-    .json(
-      200,
-      new ApiResponse(200, video[0], "Video uploaded Successfully!! "),
-    );
+    .status(200)
+    .json(new ApiResponse(200, video[0], "Video uploaded Successfully!! "));
 });
 
 const getVideoById = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
   //TODO: get video by id
-  console.log(videoId);
 
   const video = await Video.findById(videoId);
+
+  if (!video)
+    throw new ApiError(400, "Unable to fetch video you are requesting..");
+
+
+  res
+    .status(200)
+    .json(new ApiResponse(200, video, "Video Fetched Successfully!!"));
 });
 
 const updateVideo = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
   //TODO: update video details like title, description, thumbnail
+
 });
 
 const deleteVideo = asyncHandler(async (req, res) => {

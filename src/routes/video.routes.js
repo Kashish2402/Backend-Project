@@ -29,6 +29,6 @@ router.route("/publish").post(
  
 );
 
-router.route("/:videoId").get(getVideoById);
+router.route("/:videoId").get(verifyJWT,getVideoById);
 
 export default router;
