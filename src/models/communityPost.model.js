@@ -18,4 +18,4 @@ const communityPostSchema=new Schema(
     }
 )
 
-export const communityPost=mongoose.model("CommunityPost",tweetSchema)
+export const communityPost=mongoose.model("CommunityPost",communityPostSchema)
