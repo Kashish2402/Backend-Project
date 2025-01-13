@@ -19,7 +19,7 @@ const likeSchema = new Schema(
       },
     ],
 
-    tweet: [
+    communityPost: [
       {
         type: Schema.Types.ObjectId,
         ref: "Tweet",

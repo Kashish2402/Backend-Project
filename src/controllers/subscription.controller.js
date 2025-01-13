@@ -51,7 +51,7 @@ const getUserChannelSubscribers = asyncHandler(async (req, res) => {
       },
     },
     {
-      $unwind: "subscriber-details",
+      $unwind: "$subscriber-details",
     },
     {
       $project: {
@@ -90,7 +90,7 @@ const getSubscribedChannels = asyncHandler(async (req, res) => {
     },
 
     {
-      $unwind:"channel-details"
+      $unwind:"$channel-details"
     },
 
     {
