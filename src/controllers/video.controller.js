@@ -10,6 +10,8 @@ import { json } from "express";
 const getAllVideos = asyncHandler(async (req, res) => {
   const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query;
   //TODO: get all videos based on query, sort, pagination
+
+  
 });
 
 const publishAVideo = asyncHandler(async (req, res) => {
@@ -66,14 +68,14 @@ const updateVideo = asyncHandler(async (req, res) => {
 
   const { title, description } = req.body;
 
-  console.log(req.body)
+  console.log(req.body);
 
   if (!(title || description))
     throw new ApiError(400, "Title or description Required");
 
   const thumbnailLocalPath = req.file?.path;
 
-  console.log(req.file)
+  console.log(req.file);
 
   if (!thumbnailLocalPath) throw new ApiError(400, "thumbnail Required");
 
@@ -101,44 +103,43 @@ const updateVideo = asyncHandler(async (req, res) => {
 
   if (!video) throw new ApiError(400, "Video not fetched from database");
 
-  res.status(200).json(new ApiResponse(200,video,"Video Updated Successfully!! "))
+  res
+    .status(200)
+    .json(new ApiResponse(200, video, "Video Updated Successfully!! "));
 });
 
 const deleteVideo = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
   //TODO: delete video
 
-  const video=await Video.findByIdAndDelete(videoId,(err,docs)=>{
-    if(err) throw new ApiError(400,"Unable to Delete Video")
-  
-  else{
-    console.log("Video Updated Successfully ")
-  }
-}
-)
+  const video = await Video.findByIdAndDelete(videoId, (err, docs) => {
+    if (err) throw new ApiError(400, "Unable to Delete Video");
+    else {
+      console.log("Video Updated Successfully ");
+    }
+  });
 
-return res.status(200).json(new ApiError(200,"Video Deleted SuccessFully"))
-
+  return res.status(200).json(new ApiError(200, "Video Deleted SuccessFully"));
 });
 
 const togglePublishStatus = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
 
-  let video=await Video.findByIdAndUpdate(
+  let video = await Video.findByIdAndUpdate(
     videoId,
     {
-      $set:{
-        isPublished:(!isPublished)
-      }
+      $set: {
+        isPublished: !isPublished,
+      },
     },
     {
-      new:true
-    }
-  )
+      new: true,
+    },
+  );
 
-  if(!video) throw new ApiError(400,"Unable to toggle status")
+  if (!video) throw new ApiError(400, "Unable to toggle status");
 
-    res.status(200).json(new ApiResponse(200,video,"Toggled successfully"))
+  res.status(200).json(new ApiResponse(200, video, "Toggled successfully"));
 });
 
 export {
