@@ -1,6 +1,6 @@
 import { Router } from "express";
 import {
-  getUserChannelSubscribers,
+  getSubscribedChannels,
   getUserChannelSubscribers,
   toggleSubscription,
 } from "../controllers/subscription.controller.js";

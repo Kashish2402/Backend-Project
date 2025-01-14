@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { verifyJWT } from "../middlewares/authentication.middleware";
-import { createCommunityPost, deleteCommunityPost, getUserCommunityPost, updateCommunityPost } from "../controllers/communityPost.controller";
+import { verifyJWT } from "../middlewares/authentication.middleware.js";
+import { createCommunityPost, deleteCommunityPost, getUserCommunityPost, updateCommunityPost } from "../controllers/communityPost.controller.js";
 
 
 const router=Router()
