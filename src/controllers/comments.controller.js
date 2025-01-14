@@ -68,7 +68,7 @@ const deleteComment = asyncHandler(async (req, res) => {
 
   if (!isValidObjectId(commentId)) throw new ApiError(400, "Comment no found");
 
-  const comment = findByIdAndDelete(commentId);
+  const comment = await Comment.findByIdAndDelete(commentId);
 
   if (!comment) throw new ApiError(400, "Unable to delete comment");
 
