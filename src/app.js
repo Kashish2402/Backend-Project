@@ -28,6 +28,7 @@ import subscriptionRouter from './routes/subscription.routes.js'
 import postRouter from './routes/communityPost.routes.js'
 import playlistRouter from './routes/playlist.routes.js'
 import healthCheckRouter from './routes/healthCheck.routes.js'
+import dashboardRouter from './routes/dashboard.routes.js'
 
 // ROUTES DECLARATIONS
 app.use("/api/v1/users",userRouter)
@@ -38,5 +39,6 @@ app.use('/api/v1/comment',commentRouter)
 app.use('/api/v1/community-post',postRouter)
 app.use('/api/v1/playlist',playlistRouter)
 app.use('/api/v1/health-check',healthCheckRouter)
+app.use('/api/v1/dashboard',dashboardRouter)
 
 export { app };
