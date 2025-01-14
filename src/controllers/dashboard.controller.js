@@ -2,6 +2,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import mongoose, { isValidObjectId } from "mongoose";
+import { Video } from "../models/video.model.js";
 
 const getChannelStats = asyncHandler(async (req, res) => {
   // TODO: Get the channel stats like total video views, total subscribers, total videos, total likes etc.
@@ -10,7 +11,7 @@ const getChannelStats = asyncHandler(async (req, res) => {
   if (!isValidObjectId(channelId))
     throw new ApiError(400, "ChannelId not Found");
 
-  const stats = await VideoDecoder.aggregate([
+  const stats = await Video.aggregate([
     {
       $match: {
         owner: mongoose.Types.ObjectId(channelId),
@@ -62,7 +63,7 @@ const getChannelVideos = asyncHandler(async (req, res) => {
   if (!isValidObjectId(channelId))
     throw new ApiError(400, "ChannelId not Found");
 
-  const videos = await VideoColorSpace.aggregate([
+  const videos = await Video.aggregate([
     {
       $match: {
         owner: mongoose.Types.ObjectId(channelId),
