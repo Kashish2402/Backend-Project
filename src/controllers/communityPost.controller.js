@@ -34,9 +34,13 @@ const updateCommunityPost = asyncHandler(async (req, res) => {
   if (!content.trim())
     throw new ApiError(400, "Provide updated content for post");
 
-  const post = await communityPost.findByIdAndUpdate(postId, {
-    content: content,
-  });
+  const post = await communityPost.findByIdAndUpdate(
+    postId,
+    {
+      content: content,
+    },
+    { new: true },
+  );
 
   if (!post)
     throw new ApiError(400, "Something went wrong, Unable to update the post");

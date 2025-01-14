@@ -49,11 +49,11 @@ const updateComment = asyncHandler(async (req, res) => {
 
   if (!isValidObjectId(commentId)) throw new ApiError(400, "Comment not found");
 
-  if (!updatedContent) throw new ApiError(400, "Updated Comment not available");
+  if (!updatedContent.trim()) throw new ApiError(400, "Updated Comment not available");
 
   const comment = await Comment.findByIdAndUpdate(commentId, {
     content: updatedContent,
-  });
+  },{new:true});
 
   if (!comment) throw new ApiError(400, "Unable to update comment");
 
